@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[[ -z "$TOP" ]] && TOP=$(git rev-parse --show-toplevel)
+
+cd "$TOP"
+git diff --cached --name-only --diff-filter=ACM -z |
+	grep -z '\.py$' | tee \
+	>(flock -ew 3 "$TOP" xargs -tr0 reorder-python-imports \
+	--separate-from-import --exit-zero-even-if-changed) \
+	>(flock -ew 3 "$TOP" xargs -tr0 black) |
+	xargs -tr0 git add
+
+git diff --cached --name-only --diff-filter=ACM -z |
+	grep -z '^requirements.in$' &&
+	pip-compile --upgrade --generate-hashes &&
+	git add requirements.{txt,in}
