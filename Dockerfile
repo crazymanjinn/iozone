@@ -27,7 +27,7 @@ FROM clearlinux:base
 ENV DATA_DIR=/data
 RUN swupd bundle-add su-exec && \
 	swupd clean
-COPY --from=builder /build/iozone /build/entrypoint.sh .
+COPY --from=builder /build/iozone /build/entrypoint.sh /
 WORKDIR "${DATA_DIR}"
 ENTRYPOINT ["/entrypoint.sh", "/iozone"]
 CMD ["-a"]
